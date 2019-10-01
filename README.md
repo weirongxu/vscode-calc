@@ -1,7 +1,7 @@
 # vscode-calc
 
 <p align="center">
-  <img src="./logo/calc-logo.png" alt="vscode-calc" width="200">
+  <img src="https://github.com/weirongxu/vscode-calc/raw/master/logo/calc-logo.png" alt="vscode-calc" width="200">
   <br>
   <a href="https://travis-ci.com/weirongxu/vscode-calc">
     <img src="https://travis-ci.com/weirongxu/vscode-calc.svg?branch=master" alt="Build Status">
