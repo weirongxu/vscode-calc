@@ -12,28 +12,29 @@
 
 ## Features
 
-* Support bignumber, use [decimal.js](https://github.com/MikeMcl/decimal.js)
-* Suppoort [Mathematics functions](http://mikemcl.github.io/decimal.js/#methods)
+- Support underscores in numbers `10_000_000`
+- Support bignumber, use [decimal.js](https://github.com/MikeMcl/decimal.js)
+- Support [Mathematics functions](http://mikemcl.github.io/decimal.js/#methods)
 
 ![screenshot](https://user-images.githubusercontent.com/1709861/65939023-3987ce80-e457-11e9-8e4b-35a3287b1d8a.gif)
 
 ## Usage
 
 1. Input calculate expression
-    ```
-    sin(PI / 2) =
-    ```
+   ```
+   sin(PI / 2) =
+   ```
 
 ## Settings
 
-* `calc.replaceOriginalExpression`, enable relace original expression, default: `false`
+- `calc.replaceOriginalExpression`, enable relace original expression, default: `false`
 
 ## Operators
 
 Precedence is from highest to lowest.
 
 | Operator                              | Example                                     |
-|---------------------------------------|---------------------------------------------|
+| ------------------------------------- | ------------------------------------------- |
 | exponentiation `**`                   | `4 ** 3 ** 2` equivalent to `4 ** (3 ** 2)` |
 | unary `+ -`                           | `-2` `+2`                                   |
 | multiply / divide / remainder `* / %` | `4 % 3` `4 * 3`                             |
@@ -41,8 +42,8 @@ Precedence is from highest to lowest.
 
 ## Mathematics Constant
 
-* `E`
-* `PI`
+- `E`
+- `PI`
 
 ## Mathematics Functions
 

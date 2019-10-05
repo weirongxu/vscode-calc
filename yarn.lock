@@ -42,10 +42,15 @@
   resolved "https://registry.yarnpkg.com/@types/mocha/-/mocha-5.2.7.tgz#315d570ccb56c53452ff8638738df60726d5b6ea"
   integrity sha512-NYrtPht0wGzhwe9+/idPaBB+TqkY9AhTvOLMkThm0IoEfLaiVQZwBwyJ5puCkO3AUCWrmcoePjp2mbFocKy4SQ==
 
-"@types/node@*", "@types/node@^12.7.8":
+"@types/node@*":
   version "12.7.8"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.7.8.tgz#cb1bf6800238898bc2ff6ffa5702c3cadd350708"
   integrity sha512-FMdVn84tJJdV+xe+53sYiZS4R5yn1mAIxfj+DVoNiQjTYz1+OYmjwEZr1ev9nU0axXwda0QDbYl06QHanRVH3A==
+
+"@types/node@^12.7.11":
+  version "12.7.11"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-12.7.11.tgz#be879b52031cfb5d295b047f5462d8ef1a716446"
+  integrity sha512-Otxmr2rrZLKRYIybtdG/sgeO+tHY20GxeDjcGmUnmmlCWyEnv2a2x1ZXBo3BTec4OiTXMQCiazB8NMBf0iRlFw==
 
 "@types/vscode@^1.37.0":
   version "1.38.0"
@@ -922,10 +927,10 @@ duplexify@^3.4.2, duplexify@^3.6.0:
     readable-stream "^2.0.0"
     stream-shift "^1.0.0"
 
-editor-calc@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/editor-calc/-/editor-calc-1.0.2.tgz#8c7474e9548ddcbbda5a5e8d2358b3b9dde170dc"
-  integrity sha512-VcZNNzIb6vpbhn14eP/rR9o2ZRq09tOVztF0MgiO5CsL0xQ+0ED5+/t97WyXWuvc2ZH7rfpfiRHfdpJQsgQTVg==
+editor-calc@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/editor-calc/-/editor-calc-1.1.0.tgz#b7da5cc13ca41e9ed8a3e4b63e963273ed275d7c"
+  integrity sha512-qULtEQ7SfJO/LJeaOyXK4SSLeeXxq9F0gu9lakKXtdVaDuQXvCDishmzZheH0jT+fIij2tRDo0WxXh1pNyqOCg==
   dependencies:
     decimal.js "^10.2.0"
     parsimmon "^1.13.0"
