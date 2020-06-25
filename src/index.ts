@@ -6,10 +6,8 @@ import {
   Position,
   languages,
   TextEditor,
-  DocumentColorProvider,
 } from 'vscode';
 import { CalcProvider } from './calc-provider';
-import { posix } from 'path';
 
 export function activate(context: ExtensionContext) {
   const { subscriptions } = context;
@@ -64,7 +62,6 @@ export function activate(context: ExtensionContext) {
     const doc = editor.document;
     const [position, expression] = ((): [Position, string] => {
       const cursor = editor.selection.active;
-      console.log(cursor)
       if (withCursor) {
         return [
           cursor,
@@ -76,7 +73,7 @@ export function activate(context: ExtensionContext) {
         return [line.range.end, line.text];
       }
     })();
-    replaceResultWithPosition(editor, position, expression, mode);
+    await replaceResultWithPosition(editor, position, expression, mode);
   }
 
   subscriptions.push(
