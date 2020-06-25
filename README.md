@@ -25,10 +25,6 @@
    sin(PI / 2) =
    ```
 
-## Settings
-
-- `calc.replaceOriginalExpression`, enable relace original expression, default: `false`
-
 ## Operators
 
 Precedence is from highest to lowest.
