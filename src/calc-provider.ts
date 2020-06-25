@@ -141,7 +141,7 @@ export class CalcProvider implements CompletionItemProvider {
         },
       ];
     } catch (error) {
-      // tslint:disable-next-line: no-console
+      // eslint-disable-next-line no-console
       console.error(error.message, 'error');
       return [];
     }

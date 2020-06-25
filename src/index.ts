@@ -13,7 +13,7 @@ export function activate(context: ExtensionContext) {
   const { subscriptions } = context;
   const config = workspace.getConfiguration('calc');
 
-  // tslint:disable-next-line: no-console
+  // eslint-disable-next-line no-console
   const onError = console.error.bind(console);
 
   const calcProvider = new CalcProvider(config, onError);
@@ -38,14 +38,14 @@ export function activate(context: ExtensionContext) {
     } = calcProvider.calculateLine(position, expression);
     if (mode === 'append') {
       const endWithEqual = expression.trimRight().endsWith('=');
-      editor.edit((editBuilder) => {
+      await editor.edit((editBuilder) => {
         editBuilder.replace(
           expressionEndRange,
           endWithEqual ? insertText : ' = ' + insertText,
         );
       });
     } else if (mode === 'replace') {
-      editor.edit((editBuilder) => {
+      await editor.edit((editBuilder) => {
         editBuilder.replace(expressionWithEqualSignRange, insertText);
       });
     }
