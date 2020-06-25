@@ -5,8 +5,11 @@ import {
   workspace,
   Position,
   languages,
+  TextEditor,
+  DocumentColorProvider,
 } from 'vscode';
 import { CalcProvider } from './calc-provider';
+import { posix } from 'path';
 
 export function activate(context: ExtensionContext) {
   const { subscriptions } = context;
@@ -24,47 +27,76 @@ export function activate(context: ExtensionContext) {
     }),
   );
 
-  async function replaceResult(mode: 'append' | 'replace') {
-    const editor = window.activeTextEditor;
-    if (!editor || !editor.selection.isEmpty) {
-      return;
-    }
-    const position = editor.selection.active;
-    const doc = editor.document;
-    const line = doc.lineAt(position.line);
-    const equalPosition = line.text.indexOf('=', position.character - 1);
-    const character =
-      equalPosition === -1 ? line.text.length : equalPosition + 1;
-    const exprLine = line.text.slice(0, character);
+  async function replaceResultWithPosition(
+    editor: TextEditor,
+    position: Position,
+    expression: string,
+    mode: 'append' | 'replace',
+  ) {
     const {
-      newText,
+      insertText,
       expressionWithEqualSignRange,
       expressionEndRange,
-    } = calcProvider.calculateLine(
-      new Position(position.line, character),
-      exprLine,
-    );
+    } = calcProvider.calculateLine(position, expression);
     if (mode === 'append') {
-      const endWithEqual = exprLine.trimRight().endsWith('=');
+      const endWithEqual = expression.trimRight().endsWith('=');
       editor.edit((editBuilder) => {
         editBuilder.replace(
           expressionEndRange,
-          endWithEqual ? newText : ' = ' + newText,
+          endWithEqual ? insertText : ' = ' + insertText,
         );
       });
     } else if (mode === 'replace') {
       editor.edit((editBuilder) => {
-        editBuilder.replace(expressionWithEqualSignRange, newText);
+        editBuilder.replace(expressionWithEqualSignRange, insertText);
       });
     }
   }
 
+  async function replaceResult(
+    mode: 'append' | 'replace',
+    withCursor: boolean,
+  ) {
+    const editor = window.activeTextEditor;
+    if (!editor || !editor.selection.isEmpty) {
+      return;
+    }
+    const doc = editor.document;
+    const [position, expression] = ((): [Position, string] => {
+      const cursor = editor.selection.active;
+      console.log(cursor)
+      if (withCursor) {
+        return [
+          cursor,
+          doc.lineAt(cursor.line).text.slice(0, cursor.character),
+        ];
+      } else {
+        const position = editor.selection.active;
+        const line = doc.lineAt(position.line);
+        return [line.range.end, line.text];
+      }
+    })();
+    replaceResultWithPosition(editor, position, expression, mode);
+  }
+
   subscriptions.push(
+    commands.registerTextEditorCommand(
+      'extension.calcAppendWithCursor',
+      async () => {
+        await replaceResult('append', true);
+      },
+    ),
     commands.registerTextEditorCommand('extension.calcAppend', async () => {
-      await replaceResult('append');
+      await replaceResult('append', false);
     }),
+    commands.registerTextEditorCommand(
+      'extension.calcReplaceWithCursor',
+      async () => {
+        await replaceResult('replace', true);
+      },
+    ),
     commands.registerTextEditorCommand('extension.calcReplace', async () => {
-      await replaceResult('replace');
+      await replaceResult('replace', false);
     }),
   );
 }

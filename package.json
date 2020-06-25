@@ -2,7 +2,7 @@
 	"name": "calc",
 	"displayName": "calc",
 	"description": "Calculate extension for vscode",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"publisher": "raidou",
 	"license": "MIT",
 	"author": "weirongxu.raidou@gmail.com",
@@ -29,8 +29,16 @@
 	"contributes": {
 		"commands": [
 			{
+				"command": "extension.calcAppendWithCursor",
+				"title": "Calculate and append in front of cursor"
+			},
+			{
 				"command": "extension.calcAppend",
 				"title": "Calculate and append"
+			},
+			{
+				"command": "extension.calcReplaceWithCursor",
+				"title": "Calculate and replace in front of cursor"
 			},
 			{
 				"command": "extension.calcReplace",
@@ -39,19 +47,12 @@
 		],
 		"configuration": {
 			"type": "object",
-			"title": "Calc",
-			"properties": {
-				"calc.replaceOriginalExpression": {
-					"type": "boolean",
-					"default": false,
-					"description": "Enable relace original expression"
-				}
-			}
+			"title": "Calc"
 		}
 	},
 	"scripts": {
 		"vscode:prepublish": "yarn run build",
-		"clean": "rm -rf lib",
+		"clean": "rimraf lib",
 		"build": "webpack --mode production",
 		"dev": "webpack --mode development --watch",
 		"prepare": "yarn run clean && yarn run build",
@@ -65,6 +66,7 @@
 		"editor-calc": "^1.1.0",
 		"glob": "^7.1.4",
 		"mocha": "^6.1.4",
+		"rimraf": "^3.0.2",
 		"ts-loader": "^6.2.0",
 		"tslint": "^5.12.1",
 		"typescript": "^3.3.1",

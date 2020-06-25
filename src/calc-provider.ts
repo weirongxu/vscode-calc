@@ -1,6 +1,7 @@
 import {
   CompletionItemProvider,
   CompletionContext,
+  TextEditorDecorationType,
   WorkspaceConfiguration,
   TextDocument,
   CompletionItem,
@@ -9,25 +10,20 @@ import {
   Position,
   CancellationToken,
   window,
+  TextEdit,
 } from 'vscode';
 import { calculate } from 'editor-calc';
 
 export class CalcProvider implements CompletionItemProvider {
   public enableActive: boolean;
 
-  private replacePosition?: Range;
-  private enableReplaceOriginalExpression: boolean;
-  private decorationType: import('vscode').TextEditorDecorationType;
+  private decorationType: TextEditorDecorationType;
 
   constructor(
     public config: WorkspaceConfiguration,
     private onError: (error: Error) => any,
   ) {
     this.enableActive = false;
-    this.enableReplaceOriginalExpression = this.config.get<boolean>(
-      'replaceOriginalExpression',
-      true,
-    );
     this.decorationType = window.createTextEditorDecorationType({
       dark: {
         border: '1px dashed gray',
@@ -58,7 +54,7 @@ export class CalcProvider implements CompletionItemProvider {
   ): {
     skip: number;
     result: string;
-    newText: string;
+    insertText: string;
     expressionRange: Range;
     expressionWithEqualSignRange: Range;
     expressionEndRange: Range;
@@ -70,12 +66,12 @@ export class CalcProvider implements CompletionItemProvider {
     const rightMatches = formulaRaw.match(/[\s=]+$/);
     const rightEmpty = rightMatches ? rightMatches[0].length : 0;
 
-    const newText = exprLine.endsWith(' =') ? ' ' + result : result;
+    const insertText = exprLine.endsWith(' =') ? ' ' + result : result;
 
     return {
       skip,
       result,
-      newText,
+      insertText,
       expressionRange: new Range(
         position.line,
         skip + leftEmpty,
@@ -116,25 +112,33 @@ export class CalcProvider implements CompletionItemProvider {
         expressionRange,
         expressionWithEqualSignRange,
         expressionEndRange,
-        newText,
+        insertText,
       } = this.calculateLine(position, exprLine);
 
       this.clearHighlight().catch(this.onError);
 
       this.highlight(expressionRange).catch(this.onError);
 
-      this.replacePosition = expressionWithEqualSignRange;
-
       return [
         {
           label: result,
+          detail: 'calc append',
           kind: CompletionItemKind.Constant,
-          documentation: '`' + exprLine.slice(skip).trimLeft() + newText + '`',
-          textEdit: {
-            range: expressionEndRange,
-            newText,
-          },
-        } as CompletionItem,
+          documentation: '`' + result + '`',
+          range: expressionEndRange,
+          insertText,
+        },
+        {
+          label: result,
+          kind: CompletionItemKind.Constant,
+          detail: 'calc replace',
+          documentation:
+            '`' + exprLine.slice(skip).trimLeft() + insertText + '`',
+          additionalTextEdits: [
+            TextEdit.replace(expressionWithEqualSignRange, result),
+          ],
+          insertText: '',
+        },
       ];
     } catch (error) {
       // tslint:disable-next-line: no-console
@@ -147,12 +151,6 @@ export class CalcProvider implements CompletionItemProvider {
     item: CompletionItem,
     _token: CancellationToken,
   ): Promise<CompletionItem> {
-    if (this.enableReplaceOriginalExpression) {
-      item.textEdit = {
-        range: this.replacePosition!,
-        newText: item.textEdit!.newText.trim(),
-      };
-    }
     return item;
   }
 }
