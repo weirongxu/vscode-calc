@@ -1,4 +1,4 @@
-name: vscode-calc CI
+name: ci
 
 on: [push]
 

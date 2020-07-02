@@ -3,8 +3,8 @@
 <p align="center">
   <img src="https://github.com/weirongxu/vscode-calc/raw/master/logo/calc-logo.png" alt="vscode-calc" width="200">
   <br>
-  <a href="https://travis-ci.com/weirongxu/vscode-calc">
-    <img src="https://travis-ci.com/weirongxu/vscode-calc.svg?branch=master" alt="Build Status">
+  <a href="https://github.com/weirongxu/vscode-calc/actions?query=workflow%3Aci">
+    <img src="https://img.shields.io/github/workflow/status/weirongxu/vscode-calc/ci" alt="Build Status">
   </a>
   <br>
   Calculate extension for vscode
