@@ -23,6 +23,9 @@ export function activate(context: ExtensionContext) {
     workspace.onDidOpenTextDocument(() => {
       calcProvider.clearHighlight().catch(onError);
     }),
+    window.onDidChangeTextEditorSelection(() => {
+      calcProvider.clearHighlight().catch(onError);
+    })
   );
 
   async function replaceResultWithPosition(
