@@ -1,85 +1,80 @@
 {
-	"name": "calc",
-	"displayName": "calc",
-	"description": "Calculate extension for vscode",
-	"version": "2.0.1",
-	"publisher": "raidou",
-	"license": "MIT",
-	"author": "weirongxu.raidou@gmail.com",
-	"homepage": "https://github.com/weirongxu/vscode-calc",
-	"repository": "https://github.com/weirongxu/vscode-calc.git",
-	"engines": {
-		"vscode": "^1.37.0"
-	},
-	"keywords": [
-		"calculator",
-		"calc"
-	],
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [
-		"*"
-	],
-	"main": "./lib/index.js",
-	"files": [
-		"lib"
-	],
-	"icon": "logo/calc-logo.png",
-	"contributes": {
-		"commands": [
-			{
-				"command": "extension.calcAppendWithCursor",
-				"title": "Calculate and append in front of cursor"
-			},
-			{
-				"command": "extension.calcAppend",
-				"title": "Calculate and append"
-			},
-			{
-				"command": "extension.calcReplaceWithCursor",
-				"title": "Calculate and replace in front of cursor"
-			},
-			{
-				"command": "extension.calcReplace",
-				"title": "Calculate and replace"
-			}
-		],
-		"configuration": {
-			"type": "object",
-			"title": "Calc"
-		}
-	},
-	"scripts": {
-		"vscode:prepublish": "yarn run build",
-		"clean": "rimraf lib",
-		"build": "webpack --mode production",
-		"dev": "webpack --mode development --watch",
-		"prepare": "yarn run clean && yarn run build",
-		"test": "eslint src/**/*.ts"
-	},
-	"devDependencies": {
-		"@types/glob": "^7.1.1",
-		"@types/mocha": "^7.0.2",
-		"@types/node": "^14.0.14",
-		"@types/vscode": "^1.37.0",
-		"@typescript-eslint/eslint-plugin": "^3.4.0",
-		"@typescript-eslint/parser": "^3.4.0",
-		"editor-calc": "^2.0.1",
-		"eslint": "^7.3.1",
-		"glob": "^7.1.4",
-		"mocha": "^8.0.1",
-		"rimraf": "^3.0.2",
-		"ts-loader": "^7.0.5",
-		"typescript": "^3.3.1",
-		"vscode-languageserver-protocol": "^3.14.1",
-		"vscode-test": "^1.2.0",
-		"webpack": "^4.41.0",
-		"webpack-cli": "^3.3.9"
-	},
-	"__metadata": {
-		"id": "3d9e0419-faa0-41ab-b157-68a4c7a905ab",
-		"publisherDisplayName": "raidou",
-		"publisherId": "4a1cc615-b16d-4e6b-b03f-da440b8589f4"
-	}
+  "name": "calc",
+  "displayName": "calc",
+  "description": "Calculate extension for vscode",
+  "version": "2.0.1",
+  "publisher": "raidou",
+  "license": "MIT",
+  "author": "weirongxu.raidou@gmail.com",
+  "homepage": "https://github.com/weirongxu/vscode-calc",
+  "repository": "https://github.com/weirongxu/vscode-calc.git",
+  "engines": {
+    "vscode": "^1.61.0"
+  },
+  "keywords": [
+    "calculator",
+    "calc"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "*"
+  ],
+  "main": "./lib/index.js",
+  "files": [
+    "lib"
+  ],
+  "icon": "logo/calc-logo.png",
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.calcAppendWithCursor",
+        "title": "Calculate and append in front of cursor"
+      },
+      {
+        "command": "extension.calcAppend",
+        "title": "Calculate and append"
+      },
+      {
+        "command": "extension.calcReplaceWithCursor",
+        "title": "Calculate and replace in front of cursor"
+      },
+      {
+        "command": "extension.calcReplace",
+        "title": "Calculate and replace"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "Calc"
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run build",
+    "clean": "rimraf lib",
+    "esbuild-base": "esbuild ./src/index.ts --bundle --outfile=./lib/index.js --external:vscode --format=cjs --platform=node",
+    "build": "npm run esbuild-base -- --sourcemap",
+    "dev": "npm run esbuild-base -- --sourcemap --watch",
+    "prepare": "yarn run clean && yarn run build",
+    "test": "eslint src/**/*.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.0",
+    "@types/vscode": "^1.61.0",
+    "@typescript-eslint/eslint-plugin": "^4.0.0",
+    "@typescript-eslint/parser": "^4.0.0",
+    "editor-calc": "^2.1.0",
+    "esbuild": "^0.13.6",
+    "eslint": "^7.3.1",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.4.4",
+    "vscode-languageserver-protocol": "^3.16.0",
+    "vscode-test": "^1.6.1"
+  },
+  "__metadata": {
+    "id": "3d9e0419-faa0-41ab-b157-68a4c7a905ab",
+    "publisherDisplayName": "raidou",
+    "publisherId": "4a1cc615-b16d-4e6b-b03f-da440b8589f4"
+  }
 }
