@@ -57,7 +57,9 @@
     "build": "npm run esbuild-base -- --sourcemap",
     "dev": "npm run esbuild-base -- --sourcemap --watch",
     "prepare": "yarn run clean && yarn run build",
-    "test": "eslint src/**/*.ts"
+    "test": "eslint src/**/*.ts",
+    "publish:vsce": "vsce publish",
+    "publish:ovsx": "ovsx publish -p "
   },
   "devDependencies": {
     "@types/node": "^16.11.0",
