@@ -58,8 +58,15 @@ export class CalcProvider implements CompletionItemProvider {
     expressionRange: Range;
     expressionWithEqualSignRange: Range;
     expressionEndRange: Range;
-  } {
-    const { skip, result } = calculate(exprLine);
+  } | null {
+    var skip, result;
+    try {
+      ({ skip, result } = calculate(exprLine));
+    } catch(error) {
+      // eslint-disable-next-line no-console
+      this.onError(error.message, 'error');
+      return null;
+    }
     const formulaRaw = exprLine.slice(skip);
     const leftMatches = formulaRaw.match(/^\s+/);
     const leftEmpty = leftMatches ? leftMatches[0].length : 0;
@@ -105,46 +112,44 @@ export class CalcProvider implements CompletionItemProvider {
     if (!this.enableActive && !exprLine.trimRight().endsWith('=')) {
       return [];
     }
-    try {
-      const {
-        skip,
-        result,
-        expressionRange,
-        expressionWithEqualSignRange,
-        expressionEndRange,
-        insertText,
-      } = this.calculateLine(position, exprLine);
-
-      this.clearHighlight().catch(this.onError);
-
-      this.highlight(expressionRange).catch(this.onError);
-
-      return [
-        {
-          label: result,
-          detail: 'calc append',
-          kind: CompletionItemKind.Constant,
-          documentation: '`' + result + '`',
-          range: expressionEndRange,
-          insertText,
-        },
-        {
-          label: result,
-          kind: CompletionItemKind.Constant,
-          detail: 'calc replace',
-          documentation:
-            '`' + exprLine.slice(skip).trimLeft() + insertText + '`',
-          additionalTextEdits: [
-            TextEdit.replace(expressionWithEqualSignRange, result),
-          ],
-          insertText: '',
-        },
-      ];
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error.message, 'error');
+    const lineCalcResult = this.calculateLine(position, exprLine);
+    if (lineCalcResult == null) {
       return [];
     }
+    const {
+      skip,
+      result,
+      expressionRange,
+      expressionWithEqualSignRange,
+      expressionEndRange,
+      insertText,
+    } = lineCalcResult;
+
+    this.clearHighlight().catch(this.onError);
+
+    this.highlight(expressionRange).catch(this.onError);
+
+    return [
+      {
+        label: result,
+        detail: 'calc append',
+        kind: CompletionItemKind.Constant,
+        documentation: '`' + result + '`',
+        range: expressionEndRange,
+        insertText,
+      },
+      {
+        label: result,
+        kind: CompletionItemKind.Constant,
+        detail: 'calc replace',
+        documentation:
+          '`' + exprLine.slice(skip).trimLeft() + insertText + '`',
+        additionalTextEdits: [
+          TextEdit.replace(expressionWithEqualSignRange, result),
+        ],
+        insertText: '',
+      },
+    ];
   }
 
   async resolveCompletionItem(

@@ -28,30 +28,34 @@ export function activate(context: ExtensionContext) {
     })
   );
 
-  async function replaceResultWithPosition(
+  async function replaceResultsWithPositions(
     editor: TextEditor,
-    position: Position,
-    expression: string,
+    positionsAndExpressions: [Position, string][],
     mode: 'append' | 'replace',
   ) {
-    const {
-      insertText,
-      expressionWithEqualSignRange,
-      expressionEndRange,
-    } = calcProvider.calculateLine(position, expression);
-    if (mode === 'append') {
-      const endWithEqual = expression.trimRight().endsWith('=');
-      await editor.edit((editBuilder) => {
-        editBuilder.replace(
+    await editor.edit((editBuilder) => {
+      for (const [position, expression] of positionsAndExpressions) {
+        const lineCalcResult = calcProvider.calculateLine(position, expression);
+        if (lineCalcResult == null) {
+          continue;
+        }
+        const {
+          insertText,
+          expressionWithEqualSignRange,
           expressionEndRange,
-          endWithEqual ? insertText : ' = ' + insertText,
-        );
-      });
-    } else if (mode === 'replace') {
-      await editor.edit((editBuilder) => {
-        editBuilder.replace(expressionWithEqualSignRange, insertText);
-      });
-    }
+        } = lineCalcResult;
+
+        if (mode === 'append') {
+          const endWithEqual = expression.trimEnd().endsWith('=');
+            editBuilder.replace(
+              expressionEndRange,
+              endWithEqual ? insertText : ' = ' + insertText,
+            );
+        } else if (mode === 'replace') {
+            editBuilder.replace(expressionWithEqualSignRange, insertText);
+        }
+      }
+    });
   }
 
   async function replaceResult(
@@ -63,20 +67,20 @@ export function activate(context: ExtensionContext) {
       return;
     }
     const doc = editor.document;
-    const [position, expression] = ((): [Position, string] => {
-      const cursor = editor.selection.active;
-      if (withCursor) {
-        return [
-          cursor,
-          doc.lineAt(cursor.line).text.slice(0, cursor.character),
-        ];
-      } else {
-        const position = editor.selection.active;
-        const line = doc.lineAt(position.line);
-        return [line.range.end, line.text];
-      }
-    })();
-    await replaceResultWithPosition(editor, position, expression, mode);
+
+    var positionsAndExpressions;
+    if (withCursor) {
+      positionsAndExpressions = editor.selections.map(selection => 
+        <[Position, string]>[selection.active, doc.lineAt(selection.active.line).text.slice(0, selection.active.character)]
+      );
+    } else {
+      const uniqueLineNumbers = [... new Set(editor.selections.map(selection => selection.active.line))];
+      positionsAndExpressions = uniqueLineNumbers.map(number => {
+        const line = doc.lineAt(number);
+        return <[Position, string]>[line.range.end, line.text];
+      });
+    }
+    await replaceResultsWithPositions(editor, positionsAndExpressions, mode);
   }
 
   subscriptions.push(
