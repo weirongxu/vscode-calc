@@ -100,6 +100,42 @@ export class CalcProvider implements CompletionItemProvider {
     };
   }
 
+  private getCompletionResultsFromExtraCursors(
+    document: TextDocument,
+  ): {
+    additionalReplacements: Range[];
+    additionalTextInserts: string[];
+    additionalResults: string[];
+  } {
+    var additionalReplacements = [];
+    var additionalTextInserts = [];
+    var additionalResults = [];
+    
+    const editor = window.activeTextEditor;
+    if (editor) {
+      for (const selection of editor.selections.slice(1)) {
+        const position = selection.active;
+        const exprLine = document.getText(
+          new Range(new Position(position.line, 0), position),
+        );
+        const lineCalcResult = this.calculateLine(position, exprLine);
+        if (lineCalcResult == null) {
+          continue;
+        }
+        const {
+          expressionWithEqualSignRange,
+          insertText,
+          result,
+        } = lineCalcResult;
+        additionalReplacements.push(expressionWithEqualSignRange);
+        additionalTextInserts.push(insertText);
+        additionalResults.push(result);
+      }
+    }
+
+    return { additionalReplacements, additionalTextInserts, additionalResults };
+  }
+
   public async provideCompletionItems(
     document: TextDocument,
     position: Position,
@@ -129,23 +165,34 @@ export class CalcProvider implements CompletionItemProvider {
 
     this.highlight(expressionRange).catch(this.onError);
 
+    const {
+      additionalReplacements,
+      additionalTextInserts,
+      additionalResults,
+    } = this.getCompletionResultsFromExtraCursors(document);
+    const documentationPostfix = (additionalResults.length > 0 ? ' (multiple)' : '');
+
     return [
       {
         label: result,
-        detail: 'calc append',
+        detail: 'calc append' + documentationPostfix,
         kind: CompletionItemKind.Constant,
-        documentation: '`' + result + '`',
+        documentation: '`' + result + '`' + documentationPostfix,
         range: expressionEndRange,
-        insertText,
+        additionalTextEdits: [
+          TextEdit.insert(expressionWithEqualSignRange.end, result),
+          ...additionalReplacements.map((replacementRange, i) => TextEdit.insert(replacementRange.end, additionalTextInserts[i])),
+        ],
+        insertText: '', // text specified here will be inserted on every line
       },
       {
         label: result,
         kind: CompletionItemKind.Constant,
-        detail: 'calc replace',
-        documentation:
-          '`' + exprLine.slice(skip).trimLeft() + insertText + '`',
+        detail: 'calc replace' + documentationPostfix,
+        documentation: '`' + exprLine.slice(skip).trimStart() + insertText + '`' + documentationPostfix,
         additionalTextEdits: [
-          TextEdit.replace(expressionWithEqualSignRange, result),
+          TextEdit.replace(expressionWithEqualSignRange, result), 
+          ...additionalReplacements.map((replacementRange, i) => TextEdit.replace(replacementRange, additionalResults[i])),
         ],
         insertText: '',
       },
