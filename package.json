@@ -2,7 +2,7 @@
   "name": "calc",
   "displayName": "calc",
   "description": "Calculate extension for vscode",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "publisher": "raidou",
   "license": "MIT",
   "author": "weirongxu.raidou@gmail.com",
