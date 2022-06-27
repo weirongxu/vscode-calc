@@ -1,11 +1,15 @@
 {
   "root": true,
-  "extends": ["@raidou/eslint-config-base"],
+  "extends": [
+    "@raidou/eslint-config-base"
+  ],
   "env": {
     "es6": true
   },
   "rules": {
-    "no-console": ["error"],
+    "no-console": [
+      "error"
+    ],
     "no-restricted-properties": [
       "error",
       {

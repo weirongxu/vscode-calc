@@ -12,9 +12,16 @@ import { CalcProvider } from './calc-provider';
 export function activate(context: ExtensionContext) {
   const { subscriptions } = context;
   const config = workspace.getConfiguration('calc');
+  const outputChannel = window.createOutputChannel('calc');
 
-  // eslint-disable-next-line no-console
-  const onError = console.error.bind(console);
+  const onError = (error: unknown) => {
+    if (error instanceof Error) {
+      outputChannel.appendLine(error.message);
+      if (error.stack) outputChannel.appendLine(error.stack);
+    } else {
+      outputChannel.appendLine((error as any).toString().message);
+    }
+  };
 
   const calcProvider = new CalcProvider(config, onError);
 

@@ -63,7 +63,6 @@ export class CalcProvider implements CompletionItemProvider {
     try {
       ({ skip, result } = calculate(exprLine));
     } catch (error) {
-      // eslint-disable-next-line no-console
       this.onError(error);
       return null;
     }
