@@ -191,7 +191,7 @@ export class CalcProvider implements CompletionItemProvider {
         detail: 'calc replace' + documentationPostfix,
         documentation: '`' + exprLine.slice(skip).trimStart() + insertText + '`' + documentationPostfix,
         additionalTextEdits: [
-          TextEdit.replace(expressionWithEqualSignRange, insertText), 
+          TextEdit.replace(expressionWithEqualSignRange, result), 
           ...additionalReplacements.map((replacementRange, i) => TextEdit.replace(replacementRange, additionalResults[i])),
         ],
         insertText: '',
