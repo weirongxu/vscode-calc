@@ -58,8 +58,15 @@ export class CalcProvider implements CompletionItemProvider {
     expressionRange: Range;
     expressionWithEqualSignRange: Range;
     expressionEndRange: Range;
-  } {
-    const { skip, result } = calculate(exprLine);
+  } | null {
+    var skip, result;
+    try {
+      ({ skip, result } = calculate(exprLine));
+    } catch(error) {
+      // eslint-disable-next-line no-console
+      this.onError(error.message, 'error');
+      return null;
+    }
     const formulaRaw = exprLine.slice(skip);
     const leftMatches = formulaRaw.match(/^\s+/);
     const leftEmpty = leftMatches ? leftMatches[0].length : 0;
@@ -93,6 +100,42 @@ export class CalcProvider implements CompletionItemProvider {
     };
   }
 
+  private getCompletionResultsFromExtraCursors(
+    document: TextDocument,
+  ): {
+    additionalReplacements: Range[];
+    additionalTextInserts: string[];
+    additionalResults: string[];
+  } {
+    var additionalReplacements = [];
+    var additionalTextInserts = [];
+    var additionalResults = [];
+    
+    const editor = window.activeTextEditor;
+    if (editor) {
+      for (const selection of editor.selections.slice(1)) {
+        const position = selection.active;
+        const exprLine = document.getText(
+          new Range(new Position(position.line, 0), position),
+        );
+        const lineCalcResult = this.calculateLine(position, exprLine);
+        if (lineCalcResult == null) {
+          continue;
+        }
+        const {
+          expressionWithEqualSignRange,
+          insertText,
+          result,
+        } = lineCalcResult;
+        additionalReplacements.push(expressionWithEqualSignRange);
+        additionalTextInserts.push(insertText);
+        additionalResults.push(result);
+      }
+    }
+
+    return { additionalReplacements, additionalTextInserts, additionalResults };
+  }
+
   public async provideCompletionItems(
     document: TextDocument,
     position: Position,
@@ -105,46 +148,55 @@ export class CalcProvider implements CompletionItemProvider {
     if (!this.enableActive && !exprLine.trimRight().endsWith('=')) {
       return [];
     }
-    try {
-      const {
-        skip,
-        result,
-        expressionRange,
-        expressionWithEqualSignRange,
-        expressionEndRange,
-        insertText,
-      } = this.calculateLine(position, exprLine);
-
-      this.clearHighlight().catch(this.onError);
-
-      this.highlight(expressionRange).catch(this.onError);
-
-      return [
-        {
-          label: result,
-          detail: 'calc append',
-          kind: CompletionItemKind.Constant,
-          documentation: '`' + result + '`',
-          range: expressionEndRange,
-          insertText,
-        },
-        {
-          label: result,
-          kind: CompletionItemKind.Constant,
-          detail: 'calc replace',
-          documentation:
-            '`' + exprLine.slice(skip).trimLeft() + insertText + '`',
-          additionalTextEdits: [
-            TextEdit.replace(expressionWithEqualSignRange, result),
-          ],
-          insertText: '',
-        },
-      ];
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error.message, 'error');
+    const lineCalcResult = this.calculateLine(position, exprLine);
+    if (lineCalcResult == null) {
       return [];
     }
+    const {
+      skip,
+      result,
+      expressionRange,
+      expressionWithEqualSignRange,
+      expressionEndRange,
+      insertText,
+    } = lineCalcResult;
+
+    this.clearHighlight().catch(this.onError);
+
+    this.highlight(expressionRange).catch(this.onError);
+
+    const {
+      additionalReplacements,
+      additionalTextInserts,
+      additionalResults,
+    } = this.getCompletionResultsFromExtraCursors(document);
+    const documentationPostfix = (additionalResults.length > 0 ? ' (multiple)' : '');
+
+    return [
+      {
+        label: result,
+        detail: 'calc append' + documentationPostfix,
+        kind: CompletionItemKind.Constant,
+        documentation: '`' + result + '`' + documentationPostfix,
+        range: expressionEndRange,
+        additionalTextEdits: [
+          TextEdit.insert(expressionWithEqualSignRange.end, insertText),
+          ...additionalReplacements.map((replacementRange, i) => TextEdit.insert(replacementRange.end, additionalTextInserts[i])),
+        ],
+        insertText: '', // text specified here will be inserted on every line
+      },
+      {
+        label: result,
+        kind: CompletionItemKind.Constant,
+        detail: 'calc replace' + documentationPostfix,
+        documentation: '`' + exprLine.slice(skip).trimStart() + insertText + '`' + documentationPostfix,
+        additionalTextEdits: [
+          TextEdit.replace(expressionWithEqualSignRange, insertText), 
+          ...additionalReplacements.map((replacementRange, i) => TextEdit.replace(replacementRange, additionalResults[i])),
+        ],
+        insertText: '',
+      },
+    ];
   }
 
   async resolveCompletionItem(
