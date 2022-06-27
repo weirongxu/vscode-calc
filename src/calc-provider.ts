@@ -21,7 +21,7 @@ export class CalcProvider implements CompletionItemProvider {
 
   constructor(
     public config: WorkspaceConfiguration,
-    private onError: (error: Error) => any,
+    private onError: (error: unknown) => any,
   ) {
     this.enableActive = false;
     this.decorationType = window.createTextEditorDecorationType({
@@ -59,12 +59,12 @@ export class CalcProvider implements CompletionItemProvider {
     expressionWithEqualSignRange: Range;
     expressionEndRange: Range;
   } | null {
-    var skip, result;
+    let skip, result;
     try {
       ({ skip, result } = calculate(exprLine));
-    } catch(error) {
+    } catch (error) {
       // eslint-disable-next-line no-console
-      this.onError(error.message, 'error');
+      this.onError(error);
       return null;
     }
     const formulaRaw = exprLine.slice(skip);
@@ -73,7 +73,7 @@ export class CalcProvider implements CompletionItemProvider {
     const rightMatches = formulaRaw.match(/[\s=]+$/);
     const rightEmpty = rightMatches ? rightMatches[0].length : 0;
 
-    const insertText = exprLine.endsWith(' =') ? ' ' + result : result;
+    const insertText = exprLine.endsWith(' =') ? ` ${result}` : result;
 
     return {
       skip,
@@ -100,17 +100,15 @@ export class CalcProvider implements CompletionItemProvider {
     };
   }
 
-  private getCompletionResultsFromExtraCursors(
-    document: TextDocument,
-  ): {
+  private getCompletionResultsFromExtraCursors(document: TextDocument): {
     additionalReplacements: Range[];
     additionalTextInserts: string[];
     additionalResults: string[];
   } {
-    var additionalReplacements = [];
-    var additionalTextInserts = [];
-    var additionalResults = [];
-    
+    const additionalReplacements = [];
+    const additionalTextInserts = [];
+    const additionalResults = [];
+
     const editor = window.activeTextEditor;
     if (editor) {
       for (const selection of editor.selections.slice(1)) {
@@ -122,11 +120,8 @@ export class CalcProvider implements CompletionItemProvider {
         if (lineCalcResult == null) {
           continue;
         }
-        const {
-          expressionWithEqualSignRange,
-          insertText,
-          result,
-        } = lineCalcResult;
+        const { expressionWithEqualSignRange, insertText, result } =
+          lineCalcResult;
         additionalReplacements.push(expressionWithEqualSignRange);
         additionalTextInserts.push(insertText);
         additionalResults.push(result);
@@ -165,34 +160,38 @@ export class CalcProvider implements CompletionItemProvider {
 
     this.highlight(expressionRange).catch(this.onError);
 
-    const {
-      additionalReplacements,
-      additionalTextInserts,
-      additionalResults,
-    } = this.getCompletionResultsFromExtraCursors(document);
-    const documentationPostfix = (additionalResults.length > 0 ? ' (multiple)' : '');
+    const { additionalReplacements, additionalTextInserts, additionalResults } =
+      this.getCompletionResultsFromExtraCursors(document);
+    const documentationPostfix =
+      additionalResults.length > 0 ? ' (multiple)' : '';
 
     return [
       {
         label: result,
-        detail: 'calc append' + documentationPostfix,
+        detail: `calc append${documentationPostfix}`,
         kind: CompletionItemKind.Constant,
-        documentation: '`' + result + '`' + documentationPostfix,
+        documentation: `\`${result}\`${documentationPostfix}`,
         range: expressionEndRange,
         additionalTextEdits: [
           TextEdit.insert(expressionWithEqualSignRange.end, insertText),
-          ...additionalReplacements.map((replacementRange, i) => TextEdit.insert(replacementRange.end, additionalTextInserts[i])),
+          ...additionalReplacements.map((replacementRange, i) =>
+            TextEdit.insert(replacementRange.end, additionalTextInserts[i]),
+          ),
         ],
         insertText: '', // text specified here will be inserted on every line
       },
       {
         label: result,
         kind: CompletionItemKind.Constant,
-        detail: 'calc replace' + documentationPostfix,
-        documentation: '`' + exprLine.slice(skip).trimStart() + insertText + '`' + documentationPostfix,
+        detail: `calc replace${documentationPostfix}`,
+        documentation: `\`${exprLine
+          .slice(skip)
+          .trimStart()}${insertText}\`${documentationPostfix}`,
         additionalTextEdits: [
-          TextEdit.replace(expressionWithEqualSignRange, result), 
-          ...additionalReplacements.map((replacementRange, i) => TextEdit.replace(replacementRange, additionalResults[i])),
+          TextEdit.replace(expressionWithEqualSignRange, result),
+          ...additionalReplacements.map((replacementRange, i) =>
+            TextEdit.replace(replacementRange, additionalResults[i]),
+          ),
         ],
         insertText: '',
       },

@@ -25,7 +25,7 @@ export function activate(context: ExtensionContext) {
     }),
     window.onDidChangeTextEditorSelection(() => {
       calcProvider.clearHighlight().catch(onError);
-    })
+    }),
   );
 
   async function replaceResultsWithPositions(
@@ -39,20 +39,17 @@ export function activate(context: ExtensionContext) {
         if (lineCalcResult == null) {
           continue;
         }
-        const {
-          insertText,
-          expressionWithEqualSignRange,
-          expressionEndRange,
-        } = lineCalcResult;
+        const { insertText, expressionWithEqualSignRange, expressionEndRange } =
+          lineCalcResult;
 
         if (mode === 'append') {
           const endWithEqual = expression.trimEnd().endsWith('=');
-            editBuilder.replace(
-              expressionEndRange,
-              endWithEqual ? insertText : ' = ' + insertText,
-            );
+          editBuilder.replace(
+            expressionEndRange,
+            endWithEqual ? insertText : ` = ${insertText}`,
+          );
         } else if (mode === 'replace') {
-            editBuilder.replace(expressionWithEqualSignRange, insertText);
+          editBuilder.replace(expressionWithEqualSignRange, insertText);
         }
       }
     });
@@ -68,14 +65,22 @@ export function activate(context: ExtensionContext) {
     }
     const doc = editor.document;
 
-    var positionsAndExpressions;
+    let positionsAndExpressions;
     if (withCursor) {
-      positionsAndExpressions = editor.selections.map(selection => 
-        <[Position, string]>[selection.active, doc.lineAt(selection.active.line).text.slice(0, selection.active.character)]
+      positionsAndExpressions = editor.selections.map(
+        (selection) =>
+          <[Position, string]>[
+            selection.active,
+            doc
+              .lineAt(selection.active.line)
+              .text.slice(0, selection.active.character),
+          ],
       );
     } else {
-      const uniqueLineNumbers = [... new Set(editor.selections.map(selection => selection.active.line))];
-      positionsAndExpressions = uniqueLineNumbers.map(number => {
+      const uniqueLineNumbers = [
+        ...new Set(editor.selections.map((selection) => selection.active.line)),
+      ];
+      positionsAndExpressions = uniqueLineNumbers.map((number) => {
         const line = doc.lineAt(number);
         return <[Position, string]>[line.range.end, line.text];
       });
@@ -84,23 +89,20 @@ export function activate(context: ExtensionContext) {
   }
 
   subscriptions.push(
-    commands.registerTextEditorCommand(
-      'extension.calcAppendWithCursor',
-      async () => {
-        await replaceResult('append', true);
-      },
-    ),
-    commands.registerTextEditorCommand('extension.calcAppend', async () => {
-      await replaceResult('append', false);
+    commands.registerTextEditorCommand('extension.calcAppendWithCursor', () => {
+      replaceResult('append', true).catch(onError);
+    }),
+    commands.registerTextEditorCommand('extension.calcAppend', () => {
+      replaceResult('append', false).catch(onError);
     }),
     commands.registerTextEditorCommand(
       'extension.calcReplaceWithCursor',
-      async () => {
-        await replaceResult('replace', true);
+      () => {
+        replaceResult('replace', true).catch(onError);
       },
     ),
-    commands.registerTextEditorCommand('extension.calcReplace', async () => {
-      await replaceResult('replace', false);
+    commands.registerTextEditorCommand('extension.calcReplace', () => {
+      replaceResult('replace', false).catch(onError);
     }),
   );
 }
