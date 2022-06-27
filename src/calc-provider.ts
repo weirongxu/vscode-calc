@@ -180,7 +180,7 @@ export class CalcProvider implements CompletionItemProvider {
         documentation: '`' + result + '`' + documentationPostfix,
         range: expressionEndRange,
         additionalTextEdits: [
-          TextEdit.insert(expressionWithEqualSignRange.end, result),
+          TextEdit.insert(expressionWithEqualSignRange.end, insertText),
           ...additionalReplacements.map((replacementRange, i) => TextEdit.insert(replacementRange.end, additionalTextInserts[i])),
         ],
         insertText: '', // text specified here will be inserted on every line
@@ -191,7 +191,7 @@ export class CalcProvider implements CompletionItemProvider {
         detail: 'calc replace' + documentationPostfix,
         documentation: '`' + exprLine.slice(skip).trimStart() + insertText + '`' + documentationPostfix,
         additionalTextEdits: [
-          TextEdit.replace(expressionWithEqualSignRange, result), 
+          TextEdit.replace(expressionWithEqualSignRange, insertText), 
           ...additionalReplacements.map((replacementRange, i) => TextEdit.replace(replacementRange, additionalResults[i])),
         ],
         insertText: '',
