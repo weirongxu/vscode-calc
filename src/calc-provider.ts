@@ -61,7 +61,13 @@ export class CalcProvider implements CompletionItemProvider {
   } | null {
     let skip, result;
     try {
-      ({ skip, result } = calculate(exprLine));
+      exprLine = exprLine.replace(/[Ａ-Ｚａ-ｚ０-９]/g, (s) => {
+        return String.fromCharCode(s.charCodeAt(0) - 0xfee0);
+      });
+      if (!exprLine.match(/[a-zA-Z]/)) {
+        exprLine = exprLine.replace(/,/g, '');
+      }
+      ({ skip, result } = calculate(exprLine.toLowerCase()));
     } catch (error) {
       this.onError(error);
       return null;
