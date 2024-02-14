@@ -167,9 +167,11 @@ export class CalcProvider implements CompletionItemProvider {
     return [
       {
         label: result,
-        detail: `calc append${documentationPostfix}`,
         kind: CompletionItemKind.Constant,
-        documentation: `\`${result}\`${documentationPostfix}`,
+        detail: `calc append${documentationPostfix}`,
+        documentation: `\`${exprLine
+          .slice(skip)
+          .trimStart()}${insertText}\`${documentationPostfix}`,
         range: expressionEndRange,
         additionalTextEdits: [
           TextEdit.insert(expressionWithEqualSignRange.end, insertText),
@@ -183,9 +185,7 @@ export class CalcProvider implements CompletionItemProvider {
         label: result,
         kind: CompletionItemKind.Constant,
         detail: `calc replace${documentationPostfix}`,
-        documentation: `\`${exprLine
-          .slice(skip)
-          .trimStart()}${insertText}\`${documentationPostfix}`,
+        documentation: `\`${result}\`${documentationPostfix}`,
         additionalTextEdits: [
           TextEdit.replace(expressionWithEqualSignRange, result),
           ...additionalReplacements.map((replacementRange, i) =>
