@@ -166,7 +166,7 @@ export class CalcProvider implements CompletionItemProvider {
 
     return [
       {
-        label: result,
+        label: ` = ${result}`,
         kind: CompletionItemKind.Constant,
         detail: `calc append${documentationPostfix}`,
         documentation: `\`${exprLine
@@ -182,7 +182,7 @@ export class CalcProvider implements CompletionItemProvider {
         insertText: '', // text specified here will be inserted on every line
       },
       {
-        label: result,
+        label: ` ⌫ ${result}`,
         kind: CompletionItemKind.Constant,
         detail: `calc replace${documentationPostfix}`,
         documentation: `\`${result}\`${documentationPostfix}`,
